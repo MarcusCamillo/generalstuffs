@@ -1,0 +1,15 @@
+#This file has few bash commands to collect and parsing feature release year information on cloud providers (AWS, Azure and GCP)
+
+AWS
+	data collect
+		for d in $(seq 2007 2019) ; do  curl https://aws.amazon.com/about-aws/whats-new/$d/ >> aws-blog.txt ; done
+	parsing
+		for y in $(seq 2004 2019) ; do echo "$y: $(cat aws-blog.txt | grep "Posted On:" | grep $y | wc -l)" ; done
+
+Azure
+	data collect
+		for d in $(seq 1 65) ; do  curl "https://azure.microsoft.com/en-us/updates/?updatetype=features&Page=$d" >> azure-blog.txt ; done
+	parsing
+		y=0 ; c=0 ; for a in $(cat azure-blog.txt | grep -A1 -E '<div class="column medium-1">|<h2>' | grep -v "div" | sed 's/<[^>]*>//g' |  sed 's/[^[:print:]]//'); do [[ ${a} == 20[0-1][0-9] ]] && [[ $a != $y ]] && echo "$y:$c" && y=$a && c=0 ; [[ ${a} == [A-Z][a-z][a-z] ]] && c=$((c+1)) ; done
+
+GCP
